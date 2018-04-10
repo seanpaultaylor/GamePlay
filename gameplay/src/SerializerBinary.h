@@ -211,19 +211,19 @@ public:
     
 protected:
     
-    SerializerBinary(Type type, const std::string& path, std::unique_ptr<std::fstream> stream, uint32_t versionMajor, uint32_t versionMinor);
-    static Serializer* create(const std::string& path);
+    SerializerBinary(Type type, const std::string& path, Stream* stream, uint32_t versionMajor, uint32_t versionMinor);
+    static Serializer* create(const std::string& path, Stream* stream);
     void writeLengthPrefixedString(const char* str);
     void readLengthPrefixedString(std::string& str);
     
 private:
     
-    static unsigned char kNull;
-    static unsigned char kValue;
-    static unsigned char kXref;
-    static unsigned char kDefault;
+    static unsigned char BIT_NULL;
+    static unsigned char BIT_VALUE;
+    static unsigned char BIT_XREF;
+    static unsigned char BIT_DEFAULT;
+
     std::map< unsigned long, std::shared_ptr<Serializable>> _xrefs;
-    std::unique_ptr<std::fstream> _stream;
 };
 
 }

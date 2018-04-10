@@ -1,7 +1,7 @@
 QT += core gui widgets
 TARGET = gameplay-editor
 TEMPLATE = app
-CONFIG += c++14
+CONFIG += c++11
 CONFIG(debug, debug|release): DEFINES += _DEBUG
 
 SOURCES += \
@@ -99,7 +99,7 @@ linux {
     CONFIG(debug, debug|release): LIBS += -L$$PWD/../build/gameplay/Debug/ -lgameplay
     CONFIG(release, debug|release): LIBS += -L$$PWD/../build/gameplay/Release/ -lgameplay
     LIBS += -L$$PWD/../external-deps/lib/linux/x86_64/ -lgameplay-deps
-    LIBS += -lstdc++fs -lm -lrt -ldl -lX11 -lpthread -lgtk-x11-2.0 -lglib-2.0 -lgobject-2.0 -lxcb -lsndio
+    LIBS += -lrt -ldl -lX11 -lpthread -lgtk-x11-2.0 -lglib-2.0 -lgobject-2.0 -lxcb -lsndio
     LIBS += -L$$(VULKAN_SDK)/lib/ -lvulkan
 }
 

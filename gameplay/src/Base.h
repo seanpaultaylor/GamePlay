@@ -31,14 +31,11 @@
 #include <functional>
 #include <typeinfo>
 #include <typeindex>
-#include <type_traits>
+#include<type_traits>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
-#include <fstream>
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
 
 // Platform
 #ifdef __ANDROID__
@@ -133,6 +130,7 @@ namespace fs = std::experimental::filesystem;
       x = nullptr; \
    }
 #endif
+
 
 template<typename E>
 struct enable_bitwise_operators
@@ -278,7 +276,7 @@ extern void print(const char* format, ...);
 }
 
 // Compiler warnings
-#if GP_PLATFORM_WINDOWS
+#if defined(_WINDOWS)
 #pragma warning( disable : 4005 )
 #pragma warning( disable : 4172 )
 #pragma warning( disable : 4244 )

@@ -2,6 +2,7 @@
 #include "SerializerJson.h"
 #include "Activator.h"
 #include "Serializer.h"
+#include "FileSystem.h"
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
@@ -12,11 +13,11 @@ namespace gameplay
 
 SerializerJson::SerializerJson(Type type,
                                const std::string& path,
-                               std::unique_ptr<std::fstream> stream,
+                               Stream* stream,
                                uint32_t versionMajor,
                                uint32_t versionMinor,
                                JSONNODE* root) : 
-    Serializer(type, path, std::move(stream), versionMajor, versionMinor), 
+    Serializer(type, path, stream, versionMajor, versionMinor), 
     _root(root)
 {
     _nodes.push(root);
@@ -26,30 +27,15 @@ SerializerJson::~SerializerJson()
 {
 }
         
-Serializer* SerializerJson::create(const std::string& path)
+Serializer* SerializerJson::create(const std::string& path, Stream* stream)
 {
-    if (!fs::exists(path))
-        return nullptr;
-
-    size_t fileSize = fs::file_size(path);
-    std::unique_ptr<std::fstream> stream = std::make_unique<std::fstream>();
-    stream->open(path, std::fstream::binary | std::fstream::in);
-    if (!stream->is_open())
-    {
-        stream.release();
-        return nullptr;
-    }
-
-    std::vector<char> buffer;
-    buffer.resize(fileSize + 1);
-    stream->read(buffer.data(), sizeof(char) * fileSize);
-    buffer[fileSize] = '\0';
-    JSONNODE* root = json_parse(buffer.data());
+    size_t length = stream->length();
+    char* buffer = new char[length + 1];
+    stream->read(buffer, sizeof(char), length);
+    buffer[length] = '\0';
+    JSONNODE* root = json_parse(buffer);
     if (root == nullptr)
-    {
-        stream.release();
         return nullptr;
-    }
 
     Serializer* serializer = nullptr;
 
@@ -71,20 +57,17 @@ Serializer* SerializerJson::create(const std::string& path)
             std::string minor = version.substr(2, 1);
             versionMinor = std::stoi(minor);
         }
-        serializer = new SerializerJson(Type::eReader, path, std::move(stream), versionMajor, versionMinor, root);
+        serializer = new SerializerJson(Type::eReader, path, stream, versionMajor, versionMinor, root);
     }
+    GP_SAFE_DELETE_ARRAY(buffer);
     return serializer;
 }
 
 Serializer* SerializerJson::createWriter(const std::string& path)
 {
-    std::unique_ptr<std::fstream> stream = std::make_unique<std::fstream>();
-    stream->open(path, std::fstream::binary | std::fstream::out);
-    if (!stream->is_open())
-    {
-        stream.release();
+    Stream* stream = FileSystem::open(path, FileSystem::AccessFlags::eWrite);
+    if (stream == nullptr)
         return nullptr;
-    }
 
     JSONNODE* root = json_new(JSON_NODE);
     std::string version;
@@ -93,7 +76,7 @@ Serializer* SerializerJson::createWriter(const std::string& path)
     version.append(std::to_string(GP_ENGINE_VERSION_MINOR));
     json_push_back(root, json_new_a("version", version.c_str()));
 
-    Serializer* serializer = new SerializerJson(Type::eWriter, path, std::move(stream), GP_ENGINE_VERSION_MAJOR, GP_ENGINE_VERSION_MINOR, root);
+    Serializer* serializer = new SerializerJson(Type::eWriter, path, stream, GP_ENGINE_VERSION_MAJOR, GP_ENGINE_VERSION_MINOR, root);
   
     return serializer;
 }
@@ -106,13 +89,11 @@ void SerializerJson::close()
         {
             json_char* buffer = json_write_formatted(_root);
             std::string str = buffer;
-            _stream->write(buffer, sizeof(char) * str.length());
-            //json_free(buffer);
+            _stream->write(str.c_str(), sizeof(char), str.length());
+            json_free(buffer);
         }
         if (_root)
-        {
             json_delete(_root);
-        }
         _stream->close();
     }
 }

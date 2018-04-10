@@ -53,7 +53,6 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         gameplay
         $ENV{VULKAN_SDK}/lib/libvulkan.so
         ${PROJECT_SOURCE_DIR}/external-deps/lib/linux/x86_64/libgameplay-deps.a
-        stdc++fs
         m
         GL
         rt
@@ -111,7 +110,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang|AppleClang")
-    set(CMAKE_CXX_FLAGS "-std=c++14")
+    set(CMAKE_CXX_FLAGS "-std=c++11")
 endif()
 
 set_target_properties(gameplay-app PROPERTIES

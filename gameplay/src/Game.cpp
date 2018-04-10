@@ -1,6 +1,7 @@
 #include "Base.h"
 #include "Game.h"
 #include "Activator.h"
+#include "FileSystem.h"
 #include "SerializerJson.h"
 #include "Graphics.h"
 #include "Light.h"
@@ -196,6 +197,8 @@ std::shared_ptr<Scene> Game::getScene() const
 void Game::onInitialize()
 {
     _config = getConfig();
+    FileSystem::setHomePath(_config->homePath);
+
     _graphics = std::make_shared<Graphics>();
     _graphics->initialize();
 }
@@ -287,7 +290,7 @@ std::shared_ptr<Game::Config> Game::getConfig()
         return _config;
     }
 
-    auto reader = Serializer::createReader(GP_ENGINE_CONFIG);
+    Serializer* reader = Serializer::createReader(GP_ENGINE_CONFIG);
     if (reader)
     {
         std::shared_ptr<Serializable> config = reader->readObject(nullptr);
@@ -298,8 +301,7 @@ std::shared_ptr<Game::Config> Game::getConfig()
     else
     {
         _config = std::make_shared<Game::Config>();
-        std::string configUrl = fs::absolute(_config->homePath + std::string(GP_ENGINE_CONFIG)).generic_string();
-        auto writer = SerializerJson::createWriter(configUrl);
+        Serializer* writer = SerializerJson::createWriter(GP_ENGINE_CONFIG);
         writer->writeObject(nullptr, _config);
         writer->close();
         GP_SAFE_DELETE(writer);

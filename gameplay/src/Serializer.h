@@ -449,11 +449,11 @@ protected:
         eWriter
     };
 
-    Serializer(Type type, const std::string& path, std::unique_ptr<std::fstream> stream, uint32_t versionMajor, uint32_t versionMinor);
+    Serializer(Type type, const std::string& path, Stream* stream, uint32_t versionMajor, uint32_t versionMinor);
 
     Type _type;
     std::string _path;
-    std::unique_ptr<std::fstream> _stream;
+    Stream* _stream;
     uint32_t _version[2];
     
 };

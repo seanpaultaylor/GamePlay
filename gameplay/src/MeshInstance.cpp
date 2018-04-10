@@ -1,5 +1,6 @@
 #include "Base.h"
 #include "MeshInstance.h"
+#include "FileSystem.h"
 
 namespace gameplay
 {

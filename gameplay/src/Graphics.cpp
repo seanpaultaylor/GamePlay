@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "Platform.h"
 #include "SceneObject.h"
+#include "FileSystem.h"
 
 namespace gameplay
 {
@@ -1250,14 +1251,11 @@ void Graphics::destroySampler(std::shared_ptr<Sampler> sampler)
 
 std::shared_ptr<Shader> Graphics::createShader(const std::string& url)
 {
-    std::string shaderUrl = Game::getInstance()->getConfig()->homePath;
+    std::string shaderUrl = FileSystem::getHomePath();
     shaderUrl.append(SHADER_PATH);
     shaderUrl.append(url);
     shaderUrl.append(SHADER_EXT);
-    std::ifstream file(shaderUrl, std::fstream::binary | std::fstream::out);
-    std::stringstream sstr;
-    sstr << file.rdbuf();
-    std::string shaderData = sstr.str();
+    std::string shaderData = FileSystem::readAll(shaderUrl);
 
     VkShaderModuleCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -1356,6 +1354,7 @@ std::shared_ptr<DescriptorSet> Graphics::createDescriptorSet(const DescriptorSet
 
     // DescriptorSet layout
     VkDescriptorSetLayout descriptorSetLayout;
+    
     {
         VkDescriptorSetLayoutCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
